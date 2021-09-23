@@ -1,0 +1,4 @@
+def main() {
+  print(42);
+
+#BRACE MISSING NOT DETECTED
