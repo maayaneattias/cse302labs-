@@ -10,7 +10,7 @@ reserved = {
     "else": "ELSE",
     "while": "WHILE",
     "break": "BREAK",
-    "contunue": "CONTUNUE",
+    "continue": "CONTINUE",
     "true": "TRUE",
     "false": "FALSE"
 }
@@ -54,31 +54,30 @@ tokens = (
 t_TIMES = r"\*"
 t_DIV = "/"
 t_MODULUS = "%"
+t_BOOLAND = r"\&\&"
+t_BOOLOR = r"\|\|"
 t_BITAND = r"\&"
 t_BITOR = r"\|"
 t_BITXOR = r"\^"
-t_BITSHL = "<<"
 t_LPAREN = r"\("
 t_RPAREN = r"\)"
 t_PLUS = r"\+"
-t_MINUS = "-"
+t_MINUS = r"\-"
 t_SEMICOLON = ";"
 t_BITSHR = ">>"
+t_BITSHL = "<<"
 t_BITCOMPL = "~"
+t_BOOLEQ = "=="
 t_EQUAL = "="
 t_COLON = ":"
 t_LBRACE = "{"
 t_RBRACE = "}"
-
-t_LESS = "<"
 t_LESSEQ = "<="
+t_GREATEREQ = ">="
+t_LESS = "<"
 t_GREATER = ">"
-t_GREATEREQ = ">=" 
-t_BOOLEQ = "==" 
-t_BOOLNEQ = "!=" 
-t_BOOLNOT = "!" 
-t_BOOLAND = "&&" 
-t_BOOLOR = "||" 
+t_BOOLNEQ = "!="
+t_BOOLNOT = "!"
 
 
 def t_IDENT(t):
