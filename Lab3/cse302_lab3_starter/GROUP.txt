@@ -1,2 +1,14 @@
 Maayane Attias
 Dimitrov Gorazd
+
+stack starts at 16
+
+TO DO:
+1)enriching the intermediate representation in terms of TAC into a control flow graph (CFG): CFG inference from linearized TAC
+2)perform some simple control flow optimizations: 
+• Coalescing of linear chains of blocks,
+• Unreachable code elimination(UCE)
+• Jump threading for unconditional jump sequences
+• Jump threading to turn conditional jumps into unconditional jumps
+3)Serialization of the CFG back to ordinary TAC
+

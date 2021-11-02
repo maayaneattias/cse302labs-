@@ -1,0 +1,22 @@
+Opcode: label; Args: ['%.L0']; Result: None
+
+Opcode: const; Args: [0]; Result: %0
+
+Opcode: copy; Args: ['%0']; Result: %1
+
+Opcode: label; Args: ['%.L1']; Result: None
+
+Opcode: const; Args: [10]; Result: %2
+
+Opcode: sub; Args: ['%1', '%2']; Result: %3
+
+Opcode: jl; Args: ['%3', '%.L2']; Result: None
+
+Opcode: label; Args: ['.Ljmp_main_1']; Result: None
+
+Opcode: label; Args: ['.Ljmp_main_1']; Result: None
+
+Opcode: label; Args: ['%.L3']; Result: None
+
+Opcode: ret; Args: []; Result: None
+
