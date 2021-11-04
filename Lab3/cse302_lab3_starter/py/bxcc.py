@@ -26,9 +26,10 @@ if __name__ == '__main__':
     p = subprocess.Popen(cmd)
     p.wait()
     cmd = ['rm', fname[:-3] + '.s']
-    p = subprocess.Popen(cmd)
+    #p = subprocess.Popen(cmd)
     p.wait()
-    if not opts.keep_tac:
+
+    if False and not opts.keep_tac:  
         cmd = ['rm', fname[:-3] + '.tac.json']
         p = subprocess.Popen(cmd)
         p.wait()

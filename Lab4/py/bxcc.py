@@ -1,5 +1,6 @@
 from tac2x64 import compile_tac
 from bx2tac import bx_to_tac_json
+from tac_cfopt import optimize2
 import sys
 import subprocess
 import argparse
@@ -15,7 +16,8 @@ if __name__ == '__main__':
                     help='The BX(JSON) file to process')
     opts = ap.parse_args(sys.argv[1:])
     fname = opts.fname[0]
-    tac = bx_to_tac_json(fname)
+    tac = bx_to_tac_json(fname) #json tac file
+    tac = optimize2(tac)
     asm = compile_tac(tac)
 
     # print("ASM:")

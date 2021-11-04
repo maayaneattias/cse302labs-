@@ -2,14 +2,15 @@ from bx2tac import Prog,Instr,bx_to_tac_json
 import sys
 import json
 
-#NOTES:
-#keep track of instructions id in CFG block inference (only used in block_inference and copy_prop)?
-#if we use Instruction Wrapper, need to add .instr each time because self.instrs = [InstructionWrapper1,...] and modiffy Step 3 correct in block inference
+#MAKE SURE OPTIMIZATION IS CORRECT because we cannot execute yet
+#ask for a tac that works for checkpoint 1
+
+#work on bx2tac and start on function with few arguments
 
 class BasicBlock:
     def __init__(self, instrs):
         self.label = instrs[0].args[0] 
-        self.instrs = instrs #[Instr1, Instr2,...]
+        self.instrs = instrs #[Instr, Instr,...]
         self.predecessor = set()
         self.successor = set()
 
@@ -20,7 +21,7 @@ class BasicBlock:
         self.successor.add(kid_label)
 
     def __repr__(self):
-        return "Label: {}; Predecessor: {}; Successor: {}\n".format(self.label,self.predecessor,self.successor)
+        return "Label: {} ; Instructions: {}".format(self.label, self.instrs)
 
     def absorb(self, block):
         self.instrs += block.instrs
@@ -36,10 +37,6 @@ class CFG:
     def block_inference(self, instructions): 
         self.blocks = dict() # = {block_label : block_instance, ...}
 
-        #should we use this format in Step 3?
-        #self.instrs = dict() # = {id : instr, ...}
-        #self.instr_id = list()
-
         #Step 1: Add an entry label before first instruction if needed.
         if instructions[0].opcode != 'label':
             entry_label = '.Lentry'
@@ -53,19 +50,26 @@ class CFG:
         count_label = 0
         to_add = []
         for i in range(len(instructions)):
-            if instructions[i].opcode in cond_jumps or instructions[i].opcode=='jmp':
+            if instructions[i].opcode=='jmp':
             #Step 2: For jumps,add a label after the instruction if one doesn’t already exist.
-                if (i<len(instructions)-1 and instructions[i+1].opcode != 'label') or i==len(instructions)-1:
+                if (i<len(instructions)-1 and instructions[i+1].opcode != 'label'):
                     count_label +=1 
                     new_label = f".Ljmp_{self.name}_{count_label}"
                     to_add.append((i+1, Instr('label', [new_label], None) ))
 
             #Step 4: Add explicit jmps for fall-throughs
-            elif i >= 1 and instructions[i].opcode == 'label' and (instructions[i-1].opcode != 'jmp' or instructions[i-1].opcode != 'ret'):
+            if i >= 1  and instructions[i].opcode == 'label' and instructions[i-1].opcode != 'jmp':
                 new_instruction = Instr('jmp',[instructions[i].args[0]],None)
                 to_add.append((i, new_instruction))
-        
+            
+            #WHEN THERE IS NOTHING TO RETURN, WE RETURN THIS
+            #remove
+            if i== len(instructions)-1 and instructions[i].opcode!='jmp' and instructions[i].opcode!='ret':
+                new_instruction= Instr('ret',[],None)
+                to_add.append((i+1, new_instruction))
 
+        print("TO ADD!!!")
+        print(to_add)
         for i  in range(len(to_add)):
             (index, instruction) = to_add[i]
             instructions.insert(index+i, instruction)
@@ -74,32 +78,32 @@ class CFG:
         # Step 3: Start a new block at each label
         block_instr = []
         edges = [] #[(parent, kid)]
-        list_label = []
-        #handle block creation with ret
         for i in range(len(instructions)):
             block_instr.append(instructions[i])
             if instructions[i].opcode == 'jmp':
-                new_block = BasicBlock(block_instr)
-                list_label.append(new_block.label)
+                new_block = BasicBlock(block_instr)#block until jmp instruction built
                 self.blocks[new_block.label] = new_block
                 destination_label = instructions[i].args[0]
                 edges.append((new_block.label, destination_label))
                 block_instr = []
             elif instructions[i].opcode == 'ret':
                 new_block = BasicBlock(block_instr)
-                list_label.append(new_block.label)
                 self.blocks[new_block.label] = new_block
-                #edges.append((new_block.label, None))
                 block_instr = []
+            elif instructions[i].opcode in cond_jumps:
+                origin_label = block_instr[0].args[0] 
+                destination_label = instructions[i].args[1]
+                edges.append((origin_label, destination_label))
 
-        #print("edges")
-        #print(edges)
+        print("BLOCKS!")
+        print(self.blocks.values())
+        print("edges")
+        print(edges)
 
         for (parent, kid) in edges:
             self.blocks[parent].add_successor(kid)
             self.blocks[kid].add_predecessor(parent)
                 
-        #print(self.blocks.values())
         print("CFG was successfully built")
 
 
@@ -128,8 +132,7 @@ class CFG:
                     next_instr = serialized_instrs[index+1]
                     if next_instr.opcode == 'label' and next_instr.args[0] == current_instr.args[0]:
                         useless_jmps.append(index) #delete jmp instruction
-            #print("USeless jumps")
-            #print(useless_jmps)
+
             if len(useless_jmps)>=1:
                 useless_jmps.reverse()
                 for index in useless_jmps:
@@ -173,8 +176,8 @@ class CFG:
 
     def unreachable_code_elimination(self): 
         serialized_instrs = self.serialize(False) #remove unreachable blocks
-        #print("serialized_instrs!!!")
-        #print(serialized_instrs)
+        print("serialized_instrs!!!")
+        print(serialized_instrs)
         self.block_inference(serialized_instrs) #build cfg again
     
     def jump_thread(self):
@@ -274,6 +277,37 @@ class CFG:
             else:
                 break
         print("Coalesced done")
+
+
+def optimize2(filename):
+    print(f'\t Optimizing {filename}...')
+    with open(filename, 'rb') as fp:
+        tjs = json.load(fp)
+    json_list_instruction = tjs[0]['body']
+
+    tac_instructions = []
+    for dico in json_list_instruction:
+        instr = Instr(dico["opcode"], dico["args"],dico["result"])
+        tac_instructions.append(instr)
+
+    # CFG optimization
+    print("Building CFG") 
+    cfg = CFG(tac_instructions, '@main')
+    print("Optimization")
+    cfg.optimize()
+    print("Serialization")
+    proc_instrs = cfg.serialize()
+    print("Optimized tac json program")
+    body_list = []
+    for instr in proc_instrs:
+        dico = {"opcode": instr.opcode, "args": instr.args, "result": instr.result}
+        body_list.append(dico)
+    
+    tac = [{"proc": "@main", "body": body_list}]
+    with open(filename, 'w') as fp:
+        json.dump(tac, fp)
+    return filename
+
 
 if __name__ == "__main__":
     #Note:
