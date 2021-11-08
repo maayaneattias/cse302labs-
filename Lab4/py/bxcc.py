@@ -1,6 +1,6 @@
 from tac2x64 import compile_tac
 from bx2tac import bx_to_tac_json
-from tac_cfopt import optimize2
+from tac_cfopt import optimization
 import sys
 import subprocess
 import argparse
@@ -16,26 +16,29 @@ if __name__ == '__main__':
                     help='The BX(JSON) file to process')
     opts = ap.parse_args(sys.argv[1:])
     fname = opts.fname[0]
-    tac = bx_to_tac_json(fname) #json tac file
-    tac = optimize2(tac)
-    asm = compile_tac(tac)
+    tac = bx_to_tac_json(fname)  # json tac file
+    tac_optimize = optimization(tac)
+    asm_rname = compile_tac(tac_optimize)
 
     # print("ASM:")
     # for i in asm:
     #    print(i)
 
-    cmd = ['gcc', '-o', fname[:-3], 'bx_runtime.c', fname[:-3] + '.s']
+    cmd = ['gcc', '-o', asm_rname, 'bx_runtime.c', asm_rname + '.s']
     p = subprocess.Popen(cmd)
     p.wait()
-    cmd = ['rm', fname[:-3] + '.s']
+    cmd = ['rm', tac]
+    p = subprocess.Popen(cmd)
+    p.wait()
+    cmd = ['rm', asm_rname + '.s']
     p = subprocess.Popen(cmd)
     p.wait()
     if not opts.keep_tac:
-        cmd = ['rm', fname[:-3] + '.tac.json']
+        cmd = ['rm', asm_rname + '_tac.json']
         p = subprocess.Popen(cmd)
         p.wait()
 
     if opts.run:
-        cmd = [f"./{fname[:-3]}"]
+        cmd = [f"./{asm_rname}"]
         p = subprocess.Popen(cmd)
         p.wait()

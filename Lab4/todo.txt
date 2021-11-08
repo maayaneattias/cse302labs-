@@ -1,0 +1,17 @@
+Checkpoint 3:
+
+TAC Improvements
+-distinction between global name with @ and local name with %
+- all global variables and procedures will be global names.
+-Three new instruction opcodes have been added to TAC: param, call and ret.
+-All the other instructions have now been modified to allow global variables for argument and destinations, in
+addition to temporaries as before.
+-The print() statement is no longer a proper statement in BX,so the corresponding print opcode has now been removed from TAC. 
+
+
+-[{global variable}, procedures] 
+-for a procedure now: any name for proc,  args[], body
+-in body: can now take global variables and named temporaries as operands in args[]
+
+X64 Improvements:
+-Compiling global variables: in .data section

@@ -1,18 +1,19 @@
 import ply.lex as lex
 
 reserved = {
-    "print": "PRINT",
     "int": "INT",
+    "bool": "BOOL",
     "def": "DEF",
     "var": "VAR",
-    "main": "MAIN",
     "if": "IF",
     "else": "ELSE",
     "while": "WHILE",
     "break": "BREAK",
     "continue": "CONTINUE",
     "true": "TRUE",
-    "false": "FALSE"
+    "false": "FALSE",
+    "void": "VOID",
+    "return": "RETURN"
 }
 tokens = (
     # punctuation
@@ -23,6 +24,7 @@ tokens = (
     'LBRACE',
     'RBRACE',
     'COLON',
+    'COMMA',
     # arithmetic operators
     'PLUS',
     'MINUS',
@@ -70,6 +72,7 @@ t_BITCOMPL = "~"
 t_BOOLEQ = "=="
 t_EQUAL = "="
 t_COLON = ":"
+t_COMMA = r','
 t_LBRACE = "{"
 t_RBRACE = "}"
 t_LESSEQ = "<="
@@ -87,7 +90,7 @@ def t_IDENT(t):
 
 
 def t_NUMBER(t):
-    r"[0-9][0-9]*"
+    r"0|-?[1-9][0-9]*"
     t.value = int(t.value)
     return t
 
