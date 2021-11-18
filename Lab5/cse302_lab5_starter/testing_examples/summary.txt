@@ -1,0 +1,8 @@
+Works for:
+-bool_print.tac.json
+-eval_test.tac.json
+-fib.tac.json
+-fizzbuzz.tac.json
+
+Doesn't work:
+-classic_fib.tac.json

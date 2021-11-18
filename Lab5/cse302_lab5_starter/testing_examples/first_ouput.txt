@@ -1,0 +1,52 @@
+var @x = 0;
+
+proc @fib(%n):
+%.L.entry:
+  %1 = copy %n;
+  %2 = const 2;
+  %1 = sub %1, %2;
+  jl %1, %.L.0;
+  jmp %.L.N.0;
+%.L.0:
+  %0 = copy %n;
+  jmp %.L.exit;
+%.L.exit:
+  ret %0;
+%.L.N.0:
+%.L.1:
+  %6 = copy %n;
+  %7 = const 1;
+  %5 = sub %6, %7;
+  param 1, %5;
+  %3 = call @fib, 1;
+  %9 = copy %n;
+  %10 = const 2;
+  %8 = sub %9, %10;
+  param 1, %8;
+  %4 = call @fib, 1;
+  %0 = add %3, %4;
+  jmp %.L.exit;
+
+proc @main():
+%.L.entry:
+  jmp %.L.0;
+%.L.0:
+%.L.1:
+  %2 = copy @x;
+  param 1, %2;
+  %1 = call @fib, 1;
+  %3 = copy %1;
+  param 1, %3;
+  call @__bx_print_int, 1;
+  %4 = copy @x;
+  %5 = const 1;
+  @x = add %4, %5;
+  %6 = copy @x;
+  %7 = const 20;
+  %6 = sub %6, %7;
+  jnle %6, %.L.3;
+  jmp %.L.0;
+%.L.3:
+%.L.2:
+%.L.exit:
+  ret;
